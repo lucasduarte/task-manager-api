@@ -34,4 +34,36 @@ RSpec.describe 'Users API', type: :request do
 
   end
 
+  describe 'POST /users' do 
+    before do
+      header = { 'Accept' => 'application/vnd.taskmanager.v1' }
+      post '/users', params: { user: user_params}, headers: header
+    end
+    
+    context 'when request params are valid' do
+      let(:user_params) { attributes_for(:user) }
+
+      it 'return status code 201' do
+        expect(response).to have_http_status(201)
+      end
+
+      it 'returns json data' do 
+        user_response = JSON.parse(response.body)
+        expect(user_response['email']).to eq(user_params[:email])
+      end
+    end
+
+    context 'when request params are invalid' do
+      let(:user_params) { attributes_for(:user, email: 'invalid_email@') }
+
+      it 'returns status code 422' do
+        expect(response).to have_http_status(422)
+      end
+
+      it 'returns the json data for errors' do
+        user_response = JSON.parse(response.body)
+        expect(user_response).to have_key('errors')
+      end
+    end
+  end
 end
