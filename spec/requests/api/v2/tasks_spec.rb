@@ -16,6 +16,7 @@ RSpec.describe 'Task API' do
     context 'when no filter param is sent' do
       before do
         create_list(:task, 5, user_id: user.id)
+
         get '/tasks', params: {}, headers: headers
       end
   
@@ -28,20 +29,20 @@ RSpec.describe 'Task API' do
       end
     end
 
-    context 'when filter param is sent' do
+    context 'when filter and sorting param is sent' do
       let!(:notebook_task_1) { create(:task, title: 'Check if notebook is broken', user_id: user.id) }
       let!(:notebook_task_2) { create(:task, title: 'Buy a new notebook', user_id: user.id) }
       let!(:other_task_1) { create(:task, title: 'Fix the door', user_id: user.id) }
       let!(:other_task_2) { create(:task, title: 'Buy a new car', user_id: user.id) }
 
       before do
-        get '/tasks?q[title_cont]=notebook', params: {}, headers: headers
+        get '/tasks?q[title_cont]=note&q[s]=title+ASC', params: {}, headers: headers
       end
 
-      it 'returns pnlhe matching tasks' do
+      it 'returns pnlhe matching tasks in the correct order' do
         returned_task_titles = json_body[:data].map { |t| t[:attributes][:title] }
 
-        expect(returned_task_titles).to eq([notebook_task_1.title, notebook_task_2.title])
+        expect(returned_task_titles).to eq([notebook_task_2.title, notebook_task_1.title])
       end
     end
     
